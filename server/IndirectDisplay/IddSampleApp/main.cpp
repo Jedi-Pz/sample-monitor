@@ -1,5 +1,8 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
+#include <stdlib.h>
 
 #include <windows.h>
 #include <swdevice.h>
@@ -74,16 +77,25 @@ int __cdecl main(int argc, wchar_t *argv[])
     
     // Now wait for user to indicate the device should be stopped
     printf("Press 'x' to exit and destory the software device\n");
+    printf("Press 'r' to record virtual screen for 10s\n");
+
     bool bExit = false;
     do
     {
         // Wait for key press
         int key = _getch();
 
+        if (key == 'r' || key == 'R')
+        {
+            system("ffmpeg -f gdigrab -r 30 -i desktop -t 10 -vcodec libx264 -preset ultrafast screen_output.mp4");
+        }
+
         if (key == 'x' || key == 'X')
         {
             bExit = true;
         }
+
+
     }while (!bExit);
     
     // Stop the device, this will cause the sample to be unloaded

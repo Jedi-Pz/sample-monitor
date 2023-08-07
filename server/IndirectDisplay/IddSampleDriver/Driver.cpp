@@ -24,15 +24,17 @@ using namespace Microsoft::WRL;
 
 #pragma region SampleMonitors
 
-static constexpr DWORD IDD_SAMPLE_MONITOR_COUNT = 3; // If monitor count > ARRAYSIZE(s_SampleMonitors), we create edid-less monitors
+static constexpr DWORD IDD_SAMPLE_MONITOR_COUNT = 1; // If monitor count > ARRAYSIZE(s_SampleMonitors), we create edid-less monitors
 
 // Default modes reported for edid-less monitors. The first mode is set as preferred
-static const struct IndirectSampleMonitor::SampleMonitorMode s_SampleDefaultModes[] = 
+static const struct IndirectSampleMonitor::SampleMonitorMode s_SampleDefaultModes[] =
 {
-    { 1920, 1080, 60 },
-    { 1600,  900, 60 },
-    { 1024,  768, 75 },
+    { 2560, 1440, 144 },
+    { 1920, 1080,  60 },
+    { 1024,  768,  60 },
 };
+
+
 
 // FOR SAMPLE PURPOSES ONLY, Static info about monitors that will be reported to OS
 static const struct IndirectSampleMonitor s_SampleMonitors[] =
@@ -55,24 +57,6 @@ static const struct IndirectSampleMonitor s_SampleMonitors[] =
         },
         0
     },
-    // Modified EDID from Lenovo Y27fA
-    {
-        {
-            0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x30,0xAE,0xBF,0x65,0x01,0x01,0x01,0x01,0x20,0x1A,0x01,
-            0x04,0xA5,0x3C,0x22,0x78,0x3B,0xEE,0xD1,0xA5,0x55,0x48,0x9B,0x26,0x12,0x50,0x54,0x00,0x08,0x00,
-            0xA9,0xC0,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x68,0xD8,0x00,
-            0x18,0xF1,0x70,0x2D,0x80,0x58,0x2C,0x45,0x00,0x53,0x50,0x21,0x00,0x00,0x1E,0x00,0x00,0x00,0x10,
-            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFD,0x00,
-            0x30,0x92,0xB4,0xB4,0x22,0x01,0x0A,0x20,0x20,0x20,0x20,0x20,0x20,0x00,0x00,0x00,0xFC,0x00,0x4C,
-            0x45,0x4E,0x20,0x59,0x32,0x37,0x66,0x41,0x0A,0x20,0x20,0x20,0x00,0x11
-        },
-        {
-            { 3840, 2160,  60 },
-            { 1600,  900,  60 },
-            { 1024,  768,  60 },
-        },
-        0
-    }
 };
 
 #pragma endregion
@@ -95,7 +79,7 @@ static inline void FillSignalInfo(DISPLAYCONFIG_VIDEO_SIGNAL_INFO& Mode, DWORD W
 
     Mode.scanLineOrdering = DISPLAYCONFIG_SCANLINE_ORDERING_PROGRESSIVE;
 
-    Mode.pixelRate = ((UINT64) VSync) * ((UINT64) Width) * ((UINT64) Height);
+    Mode.pixelRate = ((UINT64)VSync) * ((UINT64)Width) * ((UINT64)Height);
 }
 
 static IDDCX_MONITOR_MODE CreateIddCxMonitorMode(DWORD Width, DWORD Height, DWORD VSync, IDDCX_MONITOR_MODE_ORIGIN Origin = IDDCX_MONITOR_MODE_ORIGIN_DRIVER)
@@ -397,7 +381,7 @@ void SwapChainProcessor::RunCore()
         if (hr == E_PENDING)
         {
             // We must wait for a new buffer
-            HANDLE WaitHandles [] =
+            HANDLE WaitHandles[] =
             {
                 m_hAvailableBufferEvent,
                 m_hTerminateEvent.Get()
@@ -444,7 +428,7 @@ void SwapChainProcessor::RunCore()
             // S_OK and gives us a new frame, a driver may want to use the surface in future to re-encode the desktop 
             // for better quality if there is no new frame for a while
             AcquiredBuffer.Reset();
-            
+
             // Indicate to OS that we have finished inital processing of the frame, it is a hint that
             // OS could start preparing another frame
             hr = IddCxSwapChainFinishedProcessingFrame(m_hSwapChain);
@@ -557,24 +541,22 @@ void IndirectDeviceContext::FinishInit(UINT ConnectorIndex)
 
     MonitorInfo.MonitorDescription.Size = sizeof(MonitorInfo.MonitorDescription);
     MonitorInfo.MonitorDescription.Type = IDDCX_MONITOR_DESCRIPTION_TYPE_EDID;
-    if (ConnectorIndex >= ARRAYSIZE(s_SampleMonitors))
-    {
-        MonitorInfo.MonitorDescription.DataSize = 0;
-        MonitorInfo.MonitorDescription.pData = nullptr;
-    }
-    else
-    {
-        MonitorInfo.MonitorDescription.DataSize = IndirectSampleMonitor::szEdidBlock;
-        MonitorInfo.MonitorDescription.pData = const_cast<BYTE*>(s_SampleMonitors[ConnectorIndex].pEdidBlock);
-    }
 
-    // ==============================
-    // TODO: The monitor's container ID should be distinct from "this" device's container ID if the monitor is not
-    // permanently attached to the display adapter device object. The container ID is typically made unique for each
-    // monitor and can be used to associate the monitor with other devices, like audio or input devices. In this
-    // sample we generate a random container ID GUID, but it's best practice to choose a stable container ID for a
-    // unique monitor or to use "this" device's container ID for a permanent/integrated monitor.
-    // ==============================
+
+    MonitorInfo.MonitorDescription.DataSize = 0;
+    MonitorInfo.MonitorDescription.pData = nullptr;
+    /*
+    if (ConnectorIndex >= ARRAYSIZE(s_SampleMonitors))
+     {
+         MonitorInfo.MonitorDescription.DataSize = 0;
+         MonitorInfo.MonitorDescription.pData = nullptr;
+     }
+     else
+     {
+         MonitorInfo.MonitorDescription.DataSize = IndirectSampleMonitor::szEdidBlock;
+         MonitorInfo.MonitorDescription.pData = const_cast<BYTE*>(s_SampleMonitors[ConnectorIndex].pEdidBlock);
+     }
+    */
 
     // Create a container ID
     CoCreateGuid(&MonitorInfo.MonitorContainerId);
@@ -695,6 +677,8 @@ NTSTATUS IddSampleParseMonitorDescription(const IDARG_IN_PARSEMONITORDESCRIPTION
         if (pInArgs->MonitorDescription.DataSize != IndirectSampleMonitor::szEdidBlock)
             return STATUS_INVALID_PARAMETER;
 
+
+        /*
         DWORD SampleMonitorIdx = 0;
         for(; SampleMonitorIdx < ARRAYSIZE(s_SampleMonitors); SampleMonitorIdx++)
         {
@@ -713,10 +697,11 @@ NTSTATUS IddSampleParseMonitorDescription(const IDARG_IN_PARSEMONITORDESCRIPTION
 
                 // Set the preferred mode as represented in the EDID
                 pOutArgs->PreferredMonitorModeIdx = s_SampleMonitors[SampleMonitorIdx].ulPreferredModeIdx;
-        
+
                 return STATUS_SUCCESS;
             }
         }
+        */
 
         // This EDID block does not belong to the monitors we reported earlier
         return STATUS_INVALID_PARAMETER;
@@ -737,7 +722,7 @@ NTSTATUS IddSampleMonitorGetDefaultModes(IDDCX_MONITOR MonitorObject, const IDAR
 
     if (pInArgs->DefaultMonitorModeBufferInputCount == 0)
     {
-        pOutArgs->DefaultMonitorModeBufferOutputCount = ARRAYSIZE(s_SampleDefaultModes); 
+        pOutArgs->DefaultMonitorModeBufferOutputCount = ARRAYSIZE(s_SampleDefaultModes);
     }
     else
     {
@@ -751,7 +736,7 @@ NTSTATUS IddSampleMonitorGetDefaultModes(IDDCX_MONITOR MonitorObject, const IDAR
             );
         }
 
-        pOutArgs->DefaultMonitorModeBufferOutputCount = ARRAYSIZE(s_SampleDefaultModes); 
+        pOutArgs->DefaultMonitorModeBufferOutputCount = ARRAYSIZE(s_SampleDefaultModes);
         pOutArgs->PreferredMonitorModeIdx = 0;
     }
 
@@ -776,11 +761,11 @@ NTSTATUS IddSampleMonitorQueryModes(IDDCX_MONITOR MonitorObject, const IDARG_IN_
     TargetModes.push_back(CreateIddCxTargetMode(1920, 1080, 144));
     TargetModes.push_back(CreateIddCxTargetMode(1920, 1080, 90));
     TargetModes.push_back(CreateIddCxTargetMode(1920, 1080, 60));
-    TargetModes.push_back(CreateIddCxTargetMode(1600,  900, 60));
-    TargetModes.push_back(CreateIddCxTargetMode(1024,  768, 75));
-    TargetModes.push_back(CreateIddCxTargetMode(1024,  768, 60));
+    TargetModes.push_back(CreateIddCxTargetMode(1600, 900, 60));
+    TargetModes.push_back(CreateIddCxTargetMode(1024, 768, 75));
+    TargetModes.push_back(CreateIddCxTargetMode(1024, 768, 60));
 
-    pOutArgs->TargetModeBufferOutputCount = (UINT) TargetModes.size();
+    pOutArgs->TargetModeBufferOutputCount = (UINT)TargetModes.size();
 
     if (pInArgs->TargetModeBufferInputCount >= TargetModes.size())
     {
