@@ -360,3 +360,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/server/FFmpeg-python/output.mp4
+/server/FFmpeg-python/dist/
+/server/FFmpeg-python/build/
