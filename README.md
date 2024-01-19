@@ -16,7 +16,8 @@ PC和移动设备投屏软件
 	- 工作负荷勾选`C++桌面开发` 
        
        ![img_1.png](pic/img_1.png)
-    - 单个组件勾选`最新V143带spectra的生成工具`和对应的缓解库![img.png](pic/img_2.png)
+    - 单个组件勾选`最新V143带spectra的生成工具`和对应的缓解库
+      ![img.png](pic/img_2.png)
       - 这些组件分别是：
       1. ![img_3.png](pic/img_3.png)
       2. ![img_4.png](pic/img_4.png)
