@@ -17,6 +17,7 @@ PC和移动设备投屏软件
        
        ![img_1.png](pic/img_1.png)
     - 单个组件勾选`最新V143带spectra的生成工具`和对应的缓解库
+
       ![img.png](pic/img_2.png)
       - 这些组件分别是：
       1. ![img_3.png](pic/img_3.png)
